@@ -1,12 +1,13 @@
-# To be place in dts/bindings/sensor/
+# To be placed in dts/bindings/sensor/
 description: Peacefair PZEM004T energy meter sensor
 
 compatible: "peacefair,pzem004t"
 
-include: [sensor-device.yaml, base.yaml]
+include: [sensor-device.yaml]
 
 properties:
   modbus-address:
     type: int
+    defult: 0xf8
     required: true
-    description: Modbus slave address of the PZEM004T sensor
+    description: Modbus slave address of the PZEM004T sensor (0x00 - 0xf7)

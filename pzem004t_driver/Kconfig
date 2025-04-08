@@ -14,8 +14,8 @@ config PZEM004T
       Enable the driver for the Peacefair PZEM004T Multifunction AC Meter.
 
       This driver communicates with the PZEM004T sensor using the Modbus protocol
-      over a UART interface. Ensure that the Modbus subsystem is enabled and
-      properly configured in the device tree.
+      over a UART interface. Ensue that you define pzem004t node as a child of 
+      modbus node in your device tree.
 
 config PZEM004T_ENABLE_RESET_ENERGY
     bool "Enable Reset Energy Support"
@@ -24,4 +24,4 @@ config PZEM004T_ENABLE_RESET_ENERGY
     help
       Enable support for resetting the energy counter on the PZEM004T device.
       This feature sends a custom Modbus command to reset the energy value.
-      Disable this option to prevent the reset energy functionality.
+      Enable this option to use the reset energy functionality.

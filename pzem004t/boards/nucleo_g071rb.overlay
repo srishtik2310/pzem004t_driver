@@ -5,10 +5,9 @@
  */
 
 / {
-	aliases {
-		pzem004t2 = &pzem004t2;
-		pzem004t1 = &pzem004t1; 
-	};
+    aliases {
+        pzem004t1 = &pzem004t1;
+    };
 };
 
 &arduino_serial {
@@ -17,16 +16,13 @@
     modbus1: modbus1 {
         compatible = "zephyr,modbus-serial";
         status = "okay";
-		label = "MODBUS_1";
+        label = "MODBUS_1";
 
-		pzem004t1: pzem004t1 {
+        pzem004t1: pzem004t1 {
             compatible = "peacefair,pzem004t";
             modbus-address = <0xf8>;  // Modbus address
         };
-
-		pzem004t2: pzem004t2 {
-            compatible = "peacefair,pzem004t";
-            modbus-address = <0x01>;  // Modbus address
-        };
     };
 };
+
+
