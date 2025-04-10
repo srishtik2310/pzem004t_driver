@@ -18,7 +18,7 @@ config PZEM004T
       modbus node in your device tree.
 
 config PZEM004T_ENABLE_RESET_ENERGY
-    bool "Enable Reset Energy Support"
+    bool "Include support for resetting energy value"
     default n
     depends on PZEM004T
     help

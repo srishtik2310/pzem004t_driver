@@ -3,177 +3,178 @@
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/drivers/sensor/pzem004t.h>
 
-#define READ_MEASUREMENT_VALUES
-// #define READ_SENSOR_PARAMETERS
 
 int main(void)
 {
-	const struct device *const dev = DEVICE_DT_GET(DT_ALIAS(pzem004t1));
+	const struct device *const dev = DEVICE_DT_GET(DT_ALIAS(pzem004t));
 
 	if (!device_is_ready(dev)) {
+		printk("Device %s is not ready\n", dev->name);
 		return -ENODEV;
 	}
 
-	struct sensor_value power_alarm_threshold_set;
-	struct sensor_value modbus_rtu_address_set;
+	int ret;
 
-	power_alarm_threshold_set.val1 = 200; // Set the power alarm threshold to 1000 W
-	modbus_rtu_address_set.val1 = 1;      // Set the Modbus RTU address to 0xF7
+	#if CONFIG_READ_MEASUREMENT_VALUES
+	struct sensor_value voltage;
+	struct sensor_value current;
+	struct sensor_value power;
+	struct sensor_value frequency;
+	struct sensor_value energy;
+	struct sensor_value power_factor;
+	struct sensor_value alarm_status;
+	#endif // READ_MEASUREMENT_VALUES
+
+	#if CONFIG_READ_SENSOR_PARAMETERS
+
+	struct sensor_value power_alarm_threshold;
+	struct sensor_value modbus_rtu_address;
+
+	#endif // READ_SENSOR_PARAMETERS
+
+	#if CONFIG_SET_SENSOR_PARAMETERS
+	struct sensor_value power_alarm_threshold_set = {
+		.val1 = 1000,
+		.val2 = 0
+	};
+
+	struct sensor_value modbus_rtu_address_set = {
+		.val1 = 0x01,
+		.val2 = 0
+	};
+
+	#endif // CONFIG_SET_SENSOR_PARAMETERS
 
 	while (1) {
-#ifdef READ_MEASUREMENT_VALUES
-		struct sensor_value voltage;
-		struct sensor_value current;
-		int ret;
-
+		#if CONFIG_READ_MEASUREMENT_VALUES
 		/* Fetch the latest sample from the sensor */
 		ret = sensor_sample_fetch(dev);
 		if (ret) {
 			printk("Failed to fetch sensor data: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
 
-		/* Get the voltage value */
 		ret = sensor_channel_get(dev, SENSOR_CHAN_VOLTAGE, &voltage);
 		if (ret) {
 			printk("Failed to get voltage: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
+		else{
+			printk("Voltage: %d.%d V\n", voltage.val1, voltage.val2);
+		}
+		
 
-		/* Print the voltage value */
-		printk("Voltage: %d.%d V\n", voltage.val1, voltage.val2);
-
-		/* Get the current value */
 		ret = sensor_channel_get(dev, SENSOR_CHAN_CURRENT, &current);
 		if (ret) {
 			printk("Failed to get current: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the current value */
-		printk("Current: %d.%d A\n", current.val1, current.val2);
+		else{
+			printk("Current: %d.%d A\n", current.val1, current.val2);
+		}
 
-		/* Get the power value */
-		struct sensor_value power;
+
 		ret = sensor_channel_get(dev, SENSOR_CHAN_POWER, &power);
 		if (ret) {
 			printk("Failed to get power: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the power value */
-		printk("Power: %d.%d W\n", power.val1, power.val2);
+		else{
+			printk("Power: %d.%d W\n", power.val1, power.val2);
+		}
 
-		/* Get the frequency value */
-		struct sensor_value frequency;
 		ret = sensor_channel_get(dev, SENSOR_CHAN_FREQUENCY, &frequency);
 		if (ret) {
 			printk("Failed to get frequency: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the frequency value */
-		printk("Frequency: %d.%d Hz\n", frequency.val1, frequency.val2);
+		else{
+			printk("Frequency: %d.%d Hz\n", frequency.val1, frequency.val2);
+		}
 
-		/* Get the power ENERGY value */
-		struct sensor_value energy;
+
 		ret = sensor_channel_get(dev, SENSOR_CHAN_ENERGY, &energy);
 		if (ret) {
 			printk("Failed to get energy: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the energy value */
-		printk("Energy: %d.%d Wh\n", energy.val1, energy.val2);
+		else{
+			printk("Energy: %d.%d Wh\n", energy.val1, energy.val2);
+		}
 
-		/* Get the power factor value */
-		struct sensor_value power_factor;
 		ret = sensor_channel_get(dev, SENSOR_CHAN_POWER_FACTOR, &power_factor);
 		if (ret) {
 			printk("Failed to get power factor: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the power factor value */
-		printk("Power Factor: %d.%d\n", power_factor.val1, power_factor.val2);
-		/* Get the alarm status value */
-		struct sensor_value alarm_status;
+		else{
+			printk("Power Factor: %d.%d\n", power_factor.val1, power_factor.val2);
+		}
+
 		ret = sensor_channel_get(dev, SENSOR_CHAN_ALARM_STATUS, &alarm_status);
 		if (ret) {
 			printk("Failed to get alarm status: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the alarm status value */
-		printk("Alarm Status: %d\n", alarm_status.val1);
-
-		/* Wait for 1 second before fetching again */
-		k_sleep(K_SECONDS(1));
-
-		ret = sensor_attr_set(dev, SENSOR_CHAN_RESET_ENERGY, SENSOR_ATTR_RESET_ENERGY,
-				      NULL);
-		if (ret) {
-			printk("Failed to reset energy: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
+		else{
+			printk("Alarm Status: %d\n\n", alarm_status.val1);
 		}
 
-		printk("Energy reset successfully\n");
-#endif // READ_MEASUREMENT_VALUES
+		k_msleep(1000);
 
-#ifdef READ_SENSOR_PARAMETERS
-
-		struct sensor_value power_alarm_threshold;
-		struct sensor_value modbus_rtu_address;
-
-		/* Set the power alarm threshold value */
-		int ret = sensor_attr_set(dev, SENSOR_CHAN_POWER_ALARM_THRESHOLD,
-					  SENSOR_ATTR_POWER_ALARM_THRESHOLD,
-					  &power_alarm_threshold_set);
-		if (ret) {
-			printk("Failed to set power alarm threshold: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
-		}
-		/* Set the Modbus RTU address value */
-		ret = sensor_attr_set(dev, SENSOR_CHAN_MODBUS_RTU_ADDRESS,
-				      SENSOR_ATTR_MODBUS_RTU_ADDRESS, &modbus_rtu_address_set);
-		if (ret) {
-			printk("Failed to set Modbus RTU address: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
-		}
-
-		/* Get the power alarm threshold value */
+		#endif // READ_MEASUREMENT_VALUES
+		
+		#if CONFIG_READ_SENSOR_PARAMETERS
 		ret = sensor_attr_get(dev, SENSOR_CHAN_POWER_ALARM_THRESHOLD,
 				      SENSOR_ATTR_POWER_ALARM_THRESHOLD, &power_alarm_threshold);
 		if (ret) {
 			printk("Failed to get power alarm threshold: %d\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
 		}
-		/* Print the power alarm threshold value */
-		printk("Power Alarm Threshold: %d W\n", power_alarm_threshold.val1);
+		else{
+			printk("Power Alarm Threshold: %d W\n", power_alarm_threshold.val1);
+		}
 
-		/* Get the Modbus RTU address value */
 		ret = sensor_attr_get(dev, SENSOR_CHAN_MODBUS_RTU_ADDRESS,
 				      SENSOR_ATTR_MODBUS_RTU_ADDRESS, &modbus_rtu_address);
 		if (ret) {
-			printk("Failed to get Modbus RTU address: 0x%x\n", ret);
-			k_sleep(K_SECONDS(1));
-			continue;
+			printk("Failed to get Modbus RTU address: %d\n", ret);
 		}
-		/* Print the Modbus RTU address value */
-		printk("Modbus RTU Address: 0x%x\n", modbus_rtu_address.val1);
+		else{
+			printk("Modbus RTU Address: 0x%02x\n", modbus_rtu_address.val1);
+			return 0;
+		}
+		return 0;
 
-		// power_alarm_threshold_set.val1 += 0; // Reset the power alarm threshold to 0 W
-		// modbus_rtu_address_set.val1 += 10;
+		#endif // READ_SENSOR_PARAMETERS
 
-		k_msleep(1000);
+		#if CONFIG_SET_SENSOR_PARAMETERS
+		
+		ret = sensor_attr_set(dev, SENSOR_CHAN_POWER_ALARM_THRESHOLD,
+				SENSOR_ATTR_POWER_ALARM_THRESHOLD,
+				&power_alarm_threshold_set);
 
-#endif // READ_SENSOR_PARAMETERS
+		if (ret) {
+			printk("Failed to set power alarm threshold: %d\n", ret);
+		}
+		else{
+			printk("Power alarm threshold set to: %d W\n", power_alarm_threshold_set.val1);
+		}
+
+		ret = sensor_attr_set(dev, SENSOR_CHAN_MODBUS_RTU_ADDRESS,
+					SENSOR_ATTR_MODBUS_RTU_ADDRESS, &modbus_rtu_address_set);
+
+		if (ret) {
+			printk("Failed to set Modbus RTU address: %d\n", ret);
+		}
+		else{
+			printk("Modbus RTU address set to: 0x%02x\n", modbus_rtu_address_set.val1);
+		}
+		return 0;
+		#endif // CONFIG_SET_SENSOR_PARAMETERS
+
+		#if CONFIG_RESET_ENERGY
+		ret = sensor_attr_set(dev, SENSOR_CHAN_RESET_ENERGY,
+				SENSOR_ATTR_RESET_ENERGY, NULL);
+		if (ret) {
+			printk("Failed to reset energy: %d\n", ret);
+		}
+		else{
+			printk("Energy reset successfully\n");
+		}
+		return 0;
+		#endif // CONFIG_RESET_ENERGY
 	}
 
 	return 0;

@@ -6,23 +6,21 @@
 
 / {
     aliases {
-        pzem004t1 = &pzem004t1;
+        pzem004t = &pzem004t;
     };
 };
 
 &arduino_serial {
     status = "okay";
 
-    modbus1: modbus1 {
+    modbus: modbus {
         compatible = "zephyr,modbus-serial";
         status = "okay";
         label = "MODBUS_1";
 
-        pzem004t1: pzem004t1 {
+        pzem004t: pzem004t {
             compatible = "peacefair,pzem004t";
             modbus-address = <0xf8>;  // Modbus address
         };
     };
 };
-
-
